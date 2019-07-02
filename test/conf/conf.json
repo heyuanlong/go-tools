@@ -1,0 +1,25 @@
+{
+    "server": {
+        "port": 8080,
+        "timestamp": 41330,
+        "istest": true,
+        "num": 1234.2345
+    },
+    "mysql": {
+        "user": "user",
+        "password": "password",
+        "ip": "127.0.0.1",
+        "port": 3306,
+        "mysqldb": "mysqldb"
+    },
+    "redis": {
+        "host": "127.0.0.1",
+        "port": 3306,
+        "auth": "auth"
+    },
+    "strings": [
+        "str1",
+        "str2",
+        "str3"
+    ]
+}
