@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"errors"
 	"time"
 
 	"github.com/Jeffail/gabs"
@@ -24,31 +23,4 @@ func UrlPostGetJsonObj(url string, typeStr string, paramMap map[string]interface
 		return nil, body, err
 	}
 	return jsonParsed, body, nil
-}
-
-func GabsGetJsonString(jsonParsed *gabs.Container, path string) (string, error) {
-	v, ok := jsonParsed.Path(path).Data().(string)
-	if !ok {
-		return "", errors.New("get value fail")
-	}
-
-	return v, nil
-}
-
-func GabsGetJsonFloat64(jsonParsed *gabs.Container, path string) (float64, error) {
-	v, ok := jsonParsed.Path(path).Data().(float64)
-	if !ok {
-		return 0, errors.New("get value fail")
-	}
-
-	return v, nil
-}
-
-func GabsGetJsonInt64(jsonParsed *gabs.Container, path string) (int64, error) {
-	v, ok := jsonParsed.Path(path).Data().(float64)
-	if !ok {
-		return 0, errors.New("get value fail")
-	}
-
-	return int64(v), nil
 }
