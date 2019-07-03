@@ -9,12 +9,12 @@ import (
 	"github.com/parnurzeal/gorequest"
 )
 
-func UrlPostGetJsonObj(url string, typeStr string, paramMap map[string]interface{}) (*gabs.Container, string, error) {
+func UrlPostGetJsonObj(url string, typeStr string, paramMap map[string]interface{}, timeout int64) (*gabs.Container, string, error) {
 	param, err := json.Marshal(paramMap)
 	if err != nil {
 		return nil, "", err
 	}
-	request := gorequest.New().Timeout(10 * time.Second)
+	request := gorequest.New().Timeout(time.Duration(timeout) * time.Second)
 	_, body, errs := request.Post(url).Type(typeStr).Send(string(param)).End()
 	if errs != nil {
 		return nil, body, errs[0]
