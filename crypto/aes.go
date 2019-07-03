@@ -4,9 +4,35 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"encoding/hex"
 	"errors"
 	"fmt"
 )
+
+func zeroPadding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	padtext := bytes.Repeat([]byte{0}, padding)
+	return append(ciphertext, padtext...)
+}
+
+func zeroUnPadding(origData []byte) []byte {
+	length := len(origData)
+	unpadding := int(origData[length-1])
+	return origData[:(length - unpadding)]
+}
+
+func pKCS5Padding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(ciphertext, padtext...)
+}
+
+func pKCS5UnPadding(origData []byte) []byte {
+	length := len(origData)
+	// 去掉最后一个字节 unpadding 次
+	unpadding := int(origData[length-1])
+	return origData[:(length - unpadding)]
+}
 
 func AesEncrypt(origData, key []byte) (b []byte, rerr error) {
 	defer func() {
@@ -50,27 +76,24 @@ func AesDecrypt(crypted, key []byte) (b []byte, rerr error) {
 	return origData, nil
 }
 
-func zeroPadding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	padtext := bytes.Repeat([]byte{0}, padding)
-	return append(ciphertext, padtext...)
+func AesEncryptWithString(origData string, key string) (b string, rerr error) {
+	result, err := AesEncrypt([]byte(origData), []byte(key))
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(result), nil
 }
 
-func zeroUnPadding(origData []byte) []byte {
-	length := len(origData)
-	unpadding := int(origData[length-1])
-	return origData[:(length - unpadding)]
-}
+func AesDecryptWithString(crypted string, key string) (b string, rerr error) {
+	hexCrypted, err := hex.DecodeString(crypted)
+	if err != nil {
+		return "", err
+	}
 
-func pKCS5Padding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
-}
+	origData, err := AesDecrypt(hexCrypted, []byte(key))
+	if err != nil {
+		return "", err
+	}
 
-func pKCS5UnPadding(origData []byte) []byte {
-	length := len(origData)
-	// 去掉最后一个字节 unpadding 次
-	unpadding := int(origData[length-1])
-	return origData[:(length - unpadding)]
+	return string(origData), nil
 }
