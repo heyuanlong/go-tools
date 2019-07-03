@@ -1,35 +1,34 @@
-package other
+package crypto
 
 import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/base64"
+	"encoding/hex"
 	"encoding/pem"
-	//"encoding/base32"
 	"errors"
 )
 
 // 加密
-func RsaEncrypt(origData []byte) (string, error) {
-	block, _ := pem.Decode(publicKey) //将密钥解析成公钥实例
+func RsaEncryptS1(origData []byte, publicKey []byte) ([]byte, error) {
+	block, _ := pem.Decode(publicKey) ////将密钥解析成公钥实例
 	if block == nil {
-		return "", errors.New("public key error")
+		return nil, errors.New("public key error")
 	}
 	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes) //解析pem.Decode（）返回的Block指针实例
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	pub := pubInterface.(*rsa.PublicKey)
-	rsaStr, err := rsa.EncryptPKCS1v15(rand.Reader, pub, origData) //RSA算法加密
+	resule, err := rsa.EncryptPKCS1v15(rand.Reader, pub, origData) //RSA算法加密
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return base64.StdEncoding.EncodeToString(rsaStr), nil
+	return resule, nil
 }
 
 // 解密
-func RsaDecrypt(ciphertext string) ([]byte, error) {
+func RsaDecryptS1(cipher []byte, privateKey []byte) ([]byte, error) {
 	block, _ := pem.Decode(privateKey) //将密钥解析成私钥实例
 	if block == nil {
 		return nil, errors.New("private key error!")
@@ -38,52 +37,29 @@ func RsaDecrypt(ciphertext string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	encryptedDecodeBytes, err := base64.StdEncoding.DecodeString(ciphertext)
-	if err != nil {
-		return nil, err
-	}
-	return rsa.DecryptPKCS1v15(rand.Reader, priv, encryptedDecodeBytes) //RSA算法解密
+	return rsa.DecryptPKCS1v15(rand.Reader, priv, cipher) //RSA算法解密
 }
 
-//私钥
-var privateKey = []byte(`
------BEGIN RSA PRIVATE KEY-----
-MIICXQIBAAKBgQDZsfv1qscqYdy4vY+P4e3cAtmvppXQcRvrF1cB4drkv0haU24Y
-7m5qYtT52Kr539RdbKKdLAM6s20lWy7+5C0DgacdwYWd/7PeCELyEipZJL07Vro7
-Ate8Bfjya+wltGK9+XNUIHiumUKULW4KDx21+1NLAUeJ6PeW+DAkmJWF6QIDAQAB
-AoGBAJlNxenTQj6OfCl9FMR2jlMJjtMrtQT9InQEE7m3m7bLHeC+MCJOhmNVBjaM
-ZpthDORdxIZ6oCuOf6Z2+Dl35lntGFh5J7S34UP2BWzF1IyyQfySCNexGNHKT1G1
-XKQtHmtc2gWWthEg+S6ciIyw2IGrrP2Rke81vYHExPrexf0hAkEA9Izb0MiYsMCB
-/jemLJB0Lb3Y/B8xjGjQFFBQT7bmwBVjvZWZVpnMnXi9sWGdgUpxsCuAIROXjZ40
-IRZ2C9EouwJBAOPjPvV8Sgw4vaseOqlJvSq/C/pIFx6RVznDGlc8bRg7SgTPpjHG
-4G+M3mVgpCX1a/EU1mB+fhiJ2LAZ/pTtY6sCQGaW9NwIWu3DRIVGCSMm0mYh/3X9
-DAcwLSJoctiODQ1Fq9rreDE5QfpJnaJdJfsIJNtX1F+L3YceeBXtW0Ynz2MCQBI8
-9KP274Is5FkWkUFNKnuKUK4WKOuEXEO+LpR+vIhs7k6WQ8nGDd4/mujoJBr5mkrw
-DPwqA3N5TMNDQVGv8gMCQQCaKGJgWYgvo3/milFfImbp+m7/Y3vCptarldXrYQWO
-AQjxwc71ZGBFDITYvdgJM1MTqc8xQek1FXn1vfpy2c6O
------END RSA PRIVATE KEY-----
-`)
+// 加密
+func RsaEncryptS1WithString(origData string, publicKey string) (string, error) {
+	data, err := RsaEncryptS1([]byte(origData), []byte(publicKey))
+	if err != nil {
+		return "", err
+	}
 
-//公钥
-var publicKey = []byte(`
------BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZsfv1qscqYdy4vY+P4e3cAtmv
-ppXQcRvrF1cB4drkv0haU24Y7m5qYtT52Kr539RdbKKdLAM6s20lWy7+5C0Dgacd
-wYWd/7PeCELyEipZJL07Vro7Ate8Bfjya+wltGK9+XNUIHiumUKULW4KDx21+1NL
-AUeJ6PeW+DAkmJWF6QIDAQAB
------END PUBLIC KEY-----
-`)
+	return hex.EncodeToString(data), nil
+}
 
-// func main() {
+// 解密
+func RsaDecryptS1WithString(cipher string, privateKey string) (string, error) {
+	data, err := hex.DecodeString(cipher)
+	if err != nil {
+		return "", err
+	}
 
-// 	data, err := RsaEncrypt([]byte("polaris@studygolang.com")) //RSA加密
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Println("RSA加密", string(data))
-// 	origData, err := RsaDecrypt(data) //RSA解密
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Println("RSA解密", string(origData))
-// }
+	origData, err := RsaDecryptS1(data, []byte(privateKey)) //RSA解密
+	if err != nil {
+		return "", err
+	}
+	return string(origData), nil
+}
