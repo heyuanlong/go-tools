@@ -76,7 +76,7 @@ func AesDecrypt(crypted, key []byte) (b []byte, rerr error) {
 	return origData, nil
 }
 
-func AesEncryptWithString(origData string, key string) (b string, rerr error) {
+func AesEncryptWithHex(origData string, key string) (b string, rerr error) {
 	result, err := AesEncrypt([]byte(origData), []byte(key))
 	if err != nil {
 		return "", err
@@ -84,11 +84,31 @@ func AesEncryptWithString(origData string, key string) (b string, rerr error) {
 	return hex.EncodeToString(result), nil
 }
 
-func AesDecryptWithString(crypted string, key string) (b string, rerr error) {
+func AesDecryptWithHex(crypted string, key string) (b string, rerr error) {
 	hexCrypted, err := hex.DecodeString(crypted)
 	if err != nil {
 		return "", err
 	}
+
+	origData, err := AesDecrypt(hexCrypted, []byte(key))
+	if err != nil {
+		return "", err
+	}
+
+	return string(origData), nil
+}
+
+func AesEncryptWithBase58(origData string, key string) (b string, rerr error) {
+	result, err := AesEncrypt([]byte(origData), []byte(key))
+	if err != nil {
+		return "", err
+	}
+
+	return Base58Encode(result), nil
+}
+
+func AesDecryptWithBase58(crypted string, key string) (b string, rerr error) {
+	hexCrypted := Base58Decode(crypted)
 
 	origData, err := AesDecrypt(hexCrypted, []byte(key))
 	if err != nil {

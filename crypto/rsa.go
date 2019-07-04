@@ -41,7 +41,7 @@ func RsaDecryptS1(cipher []byte, privateKey []byte) ([]byte, error) {
 }
 
 // 加密
-func RsaEncryptS1WithString(origData string, publicKey string) (string, error) {
+func RsaEncryptS1WithHex(origData string, publicKey string) (string, error) {
 	data, err := RsaEncryptS1([]byte(origData), []byte(publicKey))
 	if err != nil {
 		return "", err
@@ -51,11 +51,32 @@ func RsaEncryptS1WithString(origData string, publicKey string) (string, error) {
 }
 
 // 解密
-func RsaDecryptS1WithString(cipher string, privateKey string) (string, error) {
+func RsaDecryptS1WithHex(cipher string, privateKey string) (string, error) {
 	data, err := hex.DecodeString(cipher)
 	if err != nil {
 		return "", err
 	}
+
+	origData, err := RsaDecryptS1(data, []byte(privateKey)) //RSA解密
+	if err != nil {
+		return "", err
+	}
+	return string(origData), nil
+}
+
+// 加密
+func RsaEncryptS1WithBase58(origData string, publicKey string) (string, error) {
+	data, err := RsaEncryptS1([]byte(origData), []byte(publicKey))
+	if err != nil {
+		return "", err
+	}
+
+	return Base58Encode(data), nil
+}
+
+// 解密
+func RsaDecryptS1WithBase58(cipher string, privateKey string) (string, error) {
+	data := Base58Decode(cipher)
 
 	origData, err := RsaDecryptS1(data, []byte(privateKey)) //RSA解密
 	if err != nil {

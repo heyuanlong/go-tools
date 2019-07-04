@@ -12,16 +12,27 @@ func main() {
 
 	fmt.Println("aes-----------------------------------------------------------------")
 	aes()
+	fmt.Println()
 
-	fmt.Println("aes1-----------------------------------------------------------------")
-	aes1()
+	fmt.Println("aes_hex-----------------------------------------------------------------")
+	aes_hex()
+	fmt.Println()
+
+	fmt.Println("aes_base58-----------------------------------------------------------------")
+	aes_base58()
+	fmt.Println()
 
 	fmt.Println("rsa-----------------------------------------------------------------")
 	rsa()
-
-	fmt.Println("rsa1-----------------------------------------------------------------")
 	fmt.Println()
-	rsa1()
+
+	fmt.Println("rsa_hex-----------------------------------------------------------------")
+	rsa_hex()
+	fmt.Println()
+
+	fmt.Println("rsa_base58-----------------------------------------------------------------")
+	rsa_base58()
+	fmt.Println()
 }
 
 func aes() {
@@ -44,12 +55,25 @@ func aes() {
 	fmt.Println(string(origData))
 }
 
-func aes1() {
-	result1, err1 := crypto.AesEncryptWithString("1001|fdid#$%^&*fi232|1550733642", "sfe023f_9aaafwfl_7893345")
+func aes_hex() {
+	result1, err1 := crypto.AesEncryptWithHex("1001|fdid#$%^&*fi232|1550733642", "sfe023f_9aaafwfl_7893345")
 	if err1 != nil {
 		panic(err1)
 	}
-	origData1, err1 := crypto.AesDecryptWithString(result1, "sfe023f_9aaafwfl_7893345")
+	origData1, err1 := crypto.AesDecryptWithHex(result1, "sfe023f_9aaafwfl_7893345")
+	if err1 != nil {
+		panic(err1)
+	}
+	fmt.Println(result1)
+	fmt.Println(origData1)
+}
+
+func aes_base58() {
+	result1, err1 := crypto.AesEncryptWithBase58("1001|fdid#$%^&*fi232|1550733642", "sfe023f_9aaafwfl_7893345")
+	if err1 != nil {
+		panic(err1)
+	}
+	origData1, err1 := crypto.AesDecryptWithBase58(result1, "sfe023f_9aaafwfl_7893345")
 	if err1 != nil {
 		panic(err1)
 	}
@@ -73,13 +97,26 @@ func rsa() {
 
 }
 
-func rsa1() {
-	data, err := crypto.RsaEncryptS1WithString("polaris@studygolang.com", string(publicKey)) //RSA加密
+func rsa_hex() {
+	data, err := crypto.RsaEncryptS1WithHex("polaris@studygolang.com", string(publicKey)) //RSA加密
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("RSA加密:", data)
-	origData, err := crypto.RsaDecryptS1WithString(data, string(privateKey)) //RSA解密
+	origData, err := crypto.RsaDecryptS1WithHex(data, string(privateKey)) //RSA解密
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("RSA解密:", string(origData))
+}
+
+func rsa_base58() {
+	data, err := crypto.RsaEncryptS1WithBase58("polaris@studygolang.com", string(publicKey)) //RSA加密
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("RSA加密:", data)
+	origData, err := crypto.RsaDecryptS1WithBase58(data, string(privateKey)) //RSA解密
 	if err != nil {
 		panic(err)
 	}
