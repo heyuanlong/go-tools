@@ -41,7 +41,7 @@ func Pid(pidFile string) {
 	if pidFile == "" {
 		pidFile = "pid.txt"
 	}
-	f, err := os.OpenFile(pidFile, os.O_CREATE|os.O_APPEND, 0644)
+	f, err := os.OpenFile(pidFile, os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Println("OpenFile error:", err)
 		return
