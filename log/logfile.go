@@ -80,6 +80,7 @@ func NewLlogFile(logFileP string, prefixP string, flagP int, objLevelP, sysLevel
 	} else {
 		if ts.logFile == "" {
 			ts.logFilePoint = os.Stdout //输出到标准输出
+			ts.out = os.Stdout
 		} else {
 			logf, err := os.OpenFile(ts.logFile, os.O_CREATE|os.O_APPEND, 0644)
 			if err != nil {
@@ -185,7 +186,7 @@ func (ts *LlogFile) CheckFile() {
 	ts.mu.Lock()
 	defer ts.mu.Unlock()
 
-	if ts.logFilePoint == nil {
+	if ts.logFilePoint == nil || ts.logFilePoint == os.Stdout {
 		return
 	}
 
@@ -259,4 +260,17 @@ func randomString() string {
 		result = append(result, bytes[r.Intn(len(bytes))])
 	}
 	return string(result)
+}
+
+//---------------------------------------------------------
+var Error *LlogFile
+var Warn *LlogFile
+var Info *LlogFile
+var Debug *LlogFile
+
+func init() {
+	Error, _ = NewLlogFile("", "[Error]", LstdFlags|Lshortfile, LOG_LEVEL_ERROR, LOG_LEVEL_ERROR, 50)
+	Warn, _ = NewLlogFile("", "[Warn]", LstdFlags|Lshortfile, LOG_LEVEL_WARN, LOG_LEVEL_WARN, 50)
+	Info, _ = NewLlogFile("", "[Info]", LstdFlags|Lshortfile, LOG_LEVEL_INFO, LOG_LEVEL_INFO, 50)
+	Debug, _ = NewLlogFile("", "[Debug]", LstdFlags|Lshortfile, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG, 50)
 }

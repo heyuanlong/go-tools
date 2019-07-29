@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime/debug"
+	"time"
 )
 
 func MainGetPanicAndLoop(f func()) {
@@ -17,6 +18,7 @@ func MainGetPanicAndLoop(f func()) {
 
 			f()
 		}()
+		time.Sleep(time.Second)
 	}
 }
 
