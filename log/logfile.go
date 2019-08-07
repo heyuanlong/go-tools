@@ -80,9 +80,9 @@ func NewLlogFile(logFileP string, prefixP string, flagP int, objLevelP, sysLevel
 	} else {
 		if ts.logFile == "" {
 			ts.logFilePoint = os.Stdout //输出到标准输出
-			ts.out = os.Stdout
+			ts.out = os.Stdout          //
 		} else {
-			logf, err := os.OpenFile(ts.logFile, os.O_CREATE|os.O_APPEND, 0644)
+			logf, err := os.OpenFile(ts.logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, os.ModeAppend)
 			if err != nil {
 				fmt.Println("open file error:", err)
 				return nil, err
@@ -175,10 +175,16 @@ func (ts *LlogFile) Output(calldepth int, s string) error {
 		ts.buf = append(ts.buf, '\n')
 	}
 	_, err := ts.out.Write(ts.buf)
-	if ts.logFilePoint != nil {
-		ts.logFilePoint.Sync()
+	if err != nil {
+		return err
 	}
-	return err
+	if ts.logFilePoint != nil {
+		err := ts.logFilePoint.Sync()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (ts *LlogFile) CheckFile() {
