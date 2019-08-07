@@ -13,7 +13,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	for index := 0; index < 1000000; index++ {
+	for index := 0; index < 10; index++ {
 		klog.Println("12345678iowetuiosdfghjk---", strconv.Itoa(index))
 	}
 }
