@@ -241,6 +241,12 @@ func (l *LlogFile) Println(v ...interface{}) {
 	l.CheckFile()
 }
 
+func (l *LlogFile) Write(p []byte) (int, error) {
+	err := l.Output(2, string(p))
+	l.CheckFile()
+	return len(p), err
+}
+
 //---------------------------------------------------------
 // Cheap integer to fixed-width decimal ASCII. Give a negative width to avoid zero-padding.
 func itoa(buf *[]byte, i int, wid int) {
