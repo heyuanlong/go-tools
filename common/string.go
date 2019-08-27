@@ -11,6 +11,10 @@ import (
 	"strconv"
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 //0：数字+大小写字母，1：数字+小写字母，2：数字+大写字母，3：数字，4：小写字母
 func GetRandomString(lens int, types int) string {
 	var str string
@@ -28,9 +32,9 @@ func GetRandomString(lens int, types int) string {
 
 	bytes := []byte(str)
 	result := []byte{}
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	//r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < lens; i++ {
-		result = append(result, bytes[r.Intn(len(bytes))])
+		result = append(result, bytes[rand.Intn(len(bytes))])
 	}
 	return string(result)
 }
