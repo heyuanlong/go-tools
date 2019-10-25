@@ -81,3 +81,22 @@ func ChangeMapToURLParam(param map[string]interface{}, sep string) (string, erro
 	}
 	return b.String(), nil
 }
+
+func IsInList(v int64, lists []int64) bool {
+	for _, tv := range lists {
+		if v == tv {
+			return true
+		}
+	}
+
+	return false
+}
+func IsInListString(v string, lists []string) bool {
+	for _, tv := range lists {
+		if v == tv {
+			return true
+		}
+	}
+
+	return false
+}

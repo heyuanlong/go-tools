@@ -211,13 +211,13 @@ func (ts *LlogFile) CheckFile() {
 		ts.logFilePoint = nil
 
 		//移动文件
-		newPath := ts.logFile + "." + randomString() + "." + time.Now().Format("20060102150405")
+		newPath := ts.logFile + "." + time.Now().Format("20060102150405") + "." + randomString()
 		if err := os.Rename(ts.logFile, newPath); err != nil {
 			fmt.Println("Rename fail:", err)
 		}
 
 		//重新打开
-		logf, err := os.OpenFile(ts.logFile, os.O_CREATE|os.O_APPEND, 0644)
+		logf, err := os.OpenFile(ts.logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, os.ModeAppend)
 		if err != nil {
 			fmt.Println("open file error:", err)
 		}
