@@ -27,7 +27,9 @@ func (ts *Transaction) Begin(gormDB *gorm.DB) *gorm.DB {
 
 func (ts *Transaction) Commit() error {
 	if ts.status == 1 {
-		ts.tx.Commit()
+		if err := ts.tx.Commit().Error; err != nil {
+			return err
+		}
 		ts.status = 0
 	} else {
 		return errors.New("not transaction Commit")
@@ -37,7 +39,9 @@ func (ts *Transaction) Commit() error {
 
 func (ts *Transaction) Rollback() error {
 	if ts.status == 1 {
-		ts.tx.Rollback()
+		if err := ts.tx.Rollback().Error; err != nil {
+			return err
+		}
 		ts.status = 0
 	} else {
 		return errors.New("not transaction Rollback")
@@ -47,7 +51,9 @@ func (ts *Transaction) Rollback() error {
 
 func (ts *Transaction) Defer() error {
 	if ts.status == 1 {
-		ts.tx.Commit()
+		if err := ts.tx.Commit().Error; err != nil {
+			return err
+		}
 		ts.status = 0
 	} else {
 		return errors.New("not transaction Commit")
