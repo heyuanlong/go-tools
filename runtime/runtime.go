@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime/debug"
+	"strings"
 	"time"
 )
 
@@ -43,11 +44,32 @@ func Pid(pidFile string) {
 	if pidFile == "" {
 		pidFile = "pid.txt"
 	}
-	f, err := os.OpenFile(pidFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	f, err := os.OpenFile(pidFile, os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Println("OpenFile error:", err)
 		return
 	}
-	defer f.Close()
-	f.WriteString(fmt.Sprintf("%d", os.Getpid()))
+	defer func() {
+		_ = f.Close()
+	}()
+	_, _ = f.WriteString(fmt.Sprintf("%d", os.Getpid()))
+}
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func GetCurrentPath() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return strings.Replace(dir, "\\", "/", -1), nil
 }

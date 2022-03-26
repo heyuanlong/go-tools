@@ -17,7 +17,10 @@ func GetJsonObj(str string) (*gabs.Container, error) {
 
 //----------------------------------------------------------------
 func GabsGetJsonString(jsonParsed *gabs.Container, path string) (string, error) {
-	v, ok := jsonParsed.Path(path).Data().(string)
+	if len(path) > 0 {
+		jsonParsed = jsonParsed.Path(path)
+	}
+	v, ok := jsonParsed.Data().(string)
 	if !ok {
 		return "", errors.New("get value fail")
 	}
@@ -26,7 +29,10 @@ func GabsGetJsonString(jsonParsed *gabs.Container, path string) (string, error) 
 }
 
 func GabsGetJsonFloat64(jsonParsed *gabs.Container, path string) (float64, error) {
-	v, ok := jsonParsed.Path(path).Data().(float64)
+	if len(path) > 0 {
+		jsonParsed = jsonParsed.Path(path)
+	}
+	v, ok := jsonParsed.Data().(float64)
 	if !ok {
 		return 0, errors.New("get value fail")
 	}
@@ -35,7 +41,10 @@ func GabsGetJsonFloat64(jsonParsed *gabs.Container, path string) (float64, error
 }
 
 func GabsGetJsonInt64(jsonParsed *gabs.Container, path string) (int64, error) {
-	v, ok := jsonParsed.Path(path).Data().(float64)
+	if len(path) > 0 {
+		jsonParsed = jsonParsed.Path(path)
+	}
+	v, ok := jsonParsed.Data().(float64)
 	if !ok {
 		return 0, errors.New("get value fail")
 	}
@@ -44,7 +53,10 @@ func GabsGetJsonInt64(jsonParsed *gabs.Container, path string) (int64, error) {
 }
 
 func GabsGetJsonBool(jsonParsed *gabs.Container, path string) (bool, error) {
-	v, ok := jsonParsed.Path(path).Data().(bool)
+	if len(path) > 0 {
+		jsonParsed = jsonParsed.Path(path)
+	}
+	v, ok := jsonParsed.Data().(bool)
 	if !ok {
 		return false, errors.New("get value fail")
 	}
@@ -59,7 +71,10 @@ func GetJsonString(str string, path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	v, ok := jsonParsed.Path(path).Data().(string)
+	if len(path) > 0 {
+		jsonParsed = jsonParsed.Path(path)
+	}
+	v, ok := jsonParsed.Data().(string)
 	if !ok {
 		return "", errors.New("get value fail")
 	}
@@ -72,7 +87,10 @@ func GetJsonFloat64(str string, path string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	v, ok := jsonParsed.Path(path).Data().(float64)
+	if len(path) > 0 {
+		jsonParsed = jsonParsed.Path(path)
+	}
+	v, ok := jsonParsed.Data().(float64)
 	if !ok {
 		return 0, errors.New("get value fail")
 	}
@@ -85,7 +103,10 @@ func GetJsonInt64(str string, path string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	v, ok := jsonParsed.Path(path).Data().(float64)
+	if len(path) > 0 {
+		jsonParsed = jsonParsed.Path(path)
+	}
+	v, ok := jsonParsed.Data().(float64)
 	if !ok {
 		return 0, errors.New("get value fail")
 	}
@@ -93,12 +114,15 @@ func GetJsonInt64(str string, path string) (int64, error) {
 	return int64(v), nil
 }
 
-func GetJsonbool(str string, path string) (bool, error) {
+func GetJsonBool(str string, path string) (bool, error) {
 	jsonParsed, err := GetJsonObj(str)
 	if err != nil {
 		return false, err
 	}
-	v, ok := jsonParsed.Path(path).Data().(bool)
+	if len(path) > 0 {
+		jsonParsed = jsonParsed.Path(path)
+	}
+	v, ok := jsonParsed.Data().(bool)
 	if !ok {
 		return false, errors.New("get value fail")
 	}

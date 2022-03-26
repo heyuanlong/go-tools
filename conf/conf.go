@@ -1,65 +1,46 @@
 package conf
 
 import (
-	"errors"
 	"log"
 
-	"github.com/Jeffail/gabs"
+	"github.com/robfig/config"
 )
 
 type Kconf struct {
 	configFile string
-	Container  *gabs.Container
+	c          *config.Config
 }
 
 func NewKconf(f string) (*Kconf, error) {
-	obj := &Kconf{
-		configFile: f,
-		Container:  nil,
-	}
-	c, err := gabs.ParseJSONFile(obj.configFile)
+	tmpc, err := config.ReadDefault(f)
 	if err != nil {
-		log.Println("conf parse fail:", err)
+		log.Println("conf read fail:", err)
 		return nil, err
 	}
-	obj.Container = c
-	return obj, nil
+
+	return &Kconf{
+		configFile: f,
+		c:          tmpc,
+	}, nil
 }
 
-func (ts *Kconf) GetString(path string) (value string, err error) {
-	v, ok := ts.Container.Path(path).Data().(string)
-	if !ok {
-		return "", errors.New("get value fail")
-	}
-	return v, nil
+func (ts *Kconf) GetString(section string, option string) (value string, err error) {
+	return ts.c.String(section, option)
 }
-func (ts *Kconf) GetFloat64(path string) (value float64, err error) {
-	v, ok := ts.Container.Path(path).Data().(float64)
-	if !ok {
-		return 0, errors.New("get value fail")
-	}
-	return v, nil
+func (ts *Kconf) GetInt(section string, option string) (value int, err error) {
+	return ts.c.Int(section, option)
 }
-func (ts *Kconf) GetInt64(path string) (value int64, err error) {
-	v, ok := ts.Container.Path(path).Data().(float64)
-	if !ok {
-		return 0, errors.New("get value fail")
-	}
-	return int64(v), nil
+func (ts *Kconf) GetInt32(section string, option string) (value int32, err error) {
+	i, err := ts.GetInt(section, option)
+	return int32(i), err
 }
-
-func (ts *Kconf) GetInt(path string) (value int, err error) {
-	v, ok := ts.Container.Path(path).Data().(float64)
-	if !ok {
-		return 0, errors.New("get value fail")
-	}
-	return int(v), nil
+func (ts *Kconf) GetInt64(section string, option string) (value int64, err error) {
+	i, err := ts.GetInt(section, option)
+	return int64(i), err
 }
-
-func (ts *Kconf) GetBool(path string) (value bool, err error) {
-	v, ok := ts.Container.Path(path).Data().(bool)
-	if !ok {
-		return false, errors.New("get value fail")
-	}
-	return v, nil
+func (ts *Kconf) GetFloat(section string, option string) (value float64, err error) {
+	return ts.c.Float(section, option)
+}
+func (ts *Kconf) GetBool(section string, option string) (value bool, err error) {
+	return ts.c.Bool(section, option)
 }

@@ -1,19 +1,15 @@
 package common
 
 import (
-	"errors"
-	"math/rand"
-	"time"
-
 	"bytes"
+	"errors"
 	"fmt"
+	"math/rand"
+	"net/url"
 	"sort"
 	"strconv"
+	"strings"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 //0：数字+大小写字母，1：数字+小写字母，2：数字+大写字母，3：数字，4：小写字母
 func GetRandomString(lens int, types int) string {
@@ -32,7 +28,6 @@ func GetRandomString(lens int, types int) string {
 
 	bytes := []byte(str)
 	result := []byte{}
-	//r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < lens; i++ {
 		result = append(result, bytes[rand.Intn(len(bytes))])
 	}
@@ -82,21 +77,17 @@ func ChangeMapToURLParam(param map[string]interface{}, sep string) (string, erro
 	return b.String(), nil
 }
 
-func IsInList(v int64, lists []int64) bool {
-	for _, tv := range lists {
-		if v == tv {
-			return true
-		}
+func BuildUrlParam(sUrl string, params map[string]interface{}) string {
+	var buf strings.Builder
+	buf.WriteString(sUrl)
+	buf.WriteByte('?')
+
+	for k, v := range params {
+		buf.WriteString(url.QueryEscape(k))
+		buf.WriteByte('=')
+		buf.WriteString(url.QueryEscape(fmt.Sprint(v)))
+		buf.WriteByte('&')
 	}
 
-	return false
-}
-func IsInListString(v string, lists []string) bool {
-	for _, tv := range lists {
-		if v == tv {
-			return true
-		}
-	}
-
-	return false
+	return buf.String()
 }

@@ -14,6 +14,15 @@ func GetTimesString() string {
 	return time.Now().Format("2006-01-02 15:04:05")
 }
 
+func GetTodayString() string {
+	return time.Now().Format("2006-01-02")
+}
+
+//毫秒
+func GetTimesUnixNano() int64 {
+	return time.Now().UnixNano() / 1e6
+}
+
 //纳秒
 func GetTimesNano() int64 {
 	return time.Now().UnixNano()

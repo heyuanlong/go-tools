@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -59,13 +60,14 @@ type LlogFile struct {
 	logFile        string   //文件名称
 	logFilePoint   *os.File //文件句柄
 	logFileMaxSize int64    //单位Mb
+	split          bool     //是否每日分割日志
 }
 
 // New creates a new LlogFile. The out variable sets the
 // destination to which log data will be written.
 // The prefix appears at the beginning of each generated log line.
 // The flag argument defines the logging properties.
-func NewLlogFile(logFileP string, prefixP string, flagP int, objLevelP, sysLevelP int, logFileMaxSizeP int64) (*LlogFile, error) {
+func NewLlogFile(logFileP string, prefixP string, flagP int, objLevelP, sysLevelP int, logFileMaxSizeP int64, isSplit ...bool) (*LlogFile, error) {
 	ts := &LlogFile{
 		objLevel:       objLevelP,
 		sysLevel:       sysLevelP,
@@ -74,6 +76,9 @@ func NewLlogFile(logFileP string, prefixP string, flagP int, objLevelP, sysLevel
 		flag:           flagP,
 		logFilePoint:   nil,
 		logFileMaxSize: logFileMaxSizeP * 1024 * 1024,
+	}
+	if len(isSplit) > 0 {
+		ts.split = isSplit[0]
 	}
 	if ts.objLevel < ts.sysLevel {
 		ts.out = EntryWrite{} //空输出
@@ -211,7 +216,7 @@ func (ts *LlogFile) CheckFile() {
 		ts.logFilePoint = nil
 
 		//移动文件
-		newPath := ts.logFile + "." + time.Now().Format("20060102150405") + "." + randomString()
+		newPath := ts.logFile + "." + randomString() + "." + time.Now().Format("20060102150405")
 		if err := os.Rename(ts.logFile, newPath); err != nil {
 			fmt.Println("Rename fail:", err)
 		}
@@ -226,24 +231,97 @@ func (ts *LlogFile) CheckFile() {
 	}
 }
 
+//分割日志
+func (ts *LlogFile) CutFile() {
+	if !ts.split {
+		if rand.Intn(200) != 0 {
+			return
+		}
+	}
+
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
+
+	if ts.logFilePoint == nil || ts.logFilePoint == os.Stdout {
+		return
+	}
+
+	fileInfo, err := ts.logFilePoint.Stat()
+	if err != nil {
+		fmt.Println("logFilePoint.Stat fail:", err)
+		return
+	}
+
+	if ts.split {
+		modTimeStr := fileInfo.ModTime().Format("20060102")
+		today := time.Now().Format("20060102")
+
+		if modTimeStr != today {
+			//先关闭
+			ts.logFilePoint.Close()
+			ts.logFilePoint = nil
+
+			sep := "/"
+			pathStr := strings.Split(ts.logFile, sep)
+			name := pathStr[len(pathStr)-1]
+			newPath := pathStr[:len(pathStr)-1]
+			nameStr := strings.Split(name, ".")
+
+			monthDir := fmt.Sprintf("%s/%s/%s/%s", strings.Join(newPath, sep), nameStr[0], fileInfo.ModTime().Format("2006"), fileInfo.ModTime().Format("01"))
+			_, err := os.Stat(monthDir)
+			if os.IsNotExist(err) {
+				if err := os.MkdirAll(monthDir, 755); err != nil {
+					fmt.Println("mkdir all record month dir error:", err)
+					return
+				}
+			}
+
+			//移动文件
+			mvPath := fmt.Sprintf("%s/%s.%s", monthDir, fileInfo.ModTime().Format("02"), nameStr[1])
+			if err := os.Rename(ts.logFile, mvPath); err != nil {
+				fmt.Println("Rename fail:", err)
+			}
+		}
+	} else {
+		if fileInfo.Size() > ts.logFileMaxSize {
+			//先关闭
+			ts.logFilePoint.Close()
+			ts.logFilePoint = nil
+
+			//移动文件
+			newPath := ts.logFile + "." + randomString() + "." + time.Now().Format("20060102150405")
+			if err := os.Rename(ts.logFile, newPath); err != nil {
+				fmt.Println("Rename fail:", err)
+			}
+		}
+	}
+	//重新打开
+	logf, err := os.OpenFile(ts.logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, os.ModeAppend)
+	if err != nil {
+		fmt.Println("open file error:", err)
+	}
+	ts.logFilePoint = logf
+	ts.out = logf
+}
+
 func (l *LlogFile) Printf(format string, v ...interface{}) {
+	l.CutFile()
 	l.Output(2, fmt.Sprintf(format, v...))
-	l.CheckFile()
 }
 
 func (l *LlogFile) Print(v ...interface{}) {
+	l.CutFile()
 	l.Output(2, fmt.Sprint(v...))
-	l.CheckFile()
 }
 
 func (l *LlogFile) Println(v ...interface{}) {
+	l.CutFile()
 	l.Output(2, fmt.Sprintln(v...))
-	l.CheckFile()
 }
-
 func (l *LlogFile) Write(p []byte) (int, error) {
+	l.CutFile()
 	err := l.Output(2, string(p))
-	l.CheckFile()
+	//l.CheckFile()
 	return len(p), err
 }
 
